@@ -320,7 +320,7 @@
       ? ` el ${fFecha(r.cita.fecha)} a las ${fHora(r.cita.hora)} (${r.cita.tipo_cita})`
       : "";
     const texto = `Hola ${r.paciente.nombre}, le recordamos su cita en Dental Protect${cita}.\n\n` +
-      `Por favor responda:\n1️⃣ para CONFIRMAR su asistencia\n2️⃣ para CANCELAR su cita\n\nGracias.`;
+    `Por favor responda:\n- Escriba 1 para CONFIRMAR su asistencia\n- Escriba 2 para CANCELAR su cita\n\nGracias.`;
     return `https://wa.me/${tel}?text=${encodeURIComponent(texto)}`;
   }
 
