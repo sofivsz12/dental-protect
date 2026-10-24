@@ -119,6 +119,8 @@
   #mensaje { position: fixed; top: 16px; right: 16px; z-index: 50; max-width: 360px; padding: 13px 18px; border-radius: 12px; font-weight: 500; box-shadow: 0 8px 24px rgba(11,37,69,.25); display: none; }
   #mensaje.ok { display: block; background: var(--menta); color: #fff; }
   #mensaje.error { display: block; background: var(--coral); color: #fff; }
+  .wa { display: inline-block; background: #25d366; color: #fff; text-decoration: none; font-weight: 700; font-size: .8rem; padding: 6px 12px; border-radius: 999px; white-space: nowrap; }
+  .wa:hover { background: #1ebe5b; }
   body.solo-lectura .solo-recepcion { display: none !important; }
 </style>
 </head>
@@ -308,6 +310,18 @@
     else if (error.code === "23505") m = "Ese registro ya existe.";
     else if (error.code === "23514") m = "Algún dato no cumple las reglas del sistema.";
     aviso(contexto + ": " + m, "error");
+  }
+
+  function enlaceWhatsApp(r) {
+    let tel = String(r.paciente ? r.paciente.telefono : "").replace(/\D/g, "");
+    if (tel.length === 10) tel = "52" + tel;   // agrega la lada de México
+    if (tel.length < 11) return null;          // teléfono incompleto
+    const cita = r.cita
+      ? ` el ${fFecha(r.cita.fecha)} a las ${fHora(r.cita.hora)} (${r.cita.tipo_cita})`
+      : "";
+    const texto = `Hola ${r.paciente.nombre}, le recordamos su cita en Dental Protect${cita}.\n\n` +
+      `Por favor responda:\n1️⃣ para CONFIRMAR su asistencia\n2️⃣ para CANCELAR su cita\n\nGracias.`;
+    return `https://wa.me/${tel}?text=${encodeURIComponent(texto)}`;
   }
 
   function mostrarLogin(msg) {
@@ -506,7 +520,10 @@
           data.map((r) => `<tr><td><strong>${esc(fTsLocal(r.fecha_programada))}</strong></td>
             <td>${esc(nombre(r.paciente))}<small>Tel. ${esc(r.paciente ? r.paciente.telefono : "")}</small></td>
             <td>${r.cita ? esc(fFecha(r.cita.fecha) + " " + fHora(r.cita.hora)) + "<small>" + esc(r.cita.tipo_cita) + "</small>" : "—"}</td>
-            <td>${chip(r.medio)}</td>
+            <td>${(() => {
+              const wa = r.medio === "WhatsApp" ? enlaceWhatsApp(r) : null;
+              return wa ? `<a class="wa" href="${esc(wa)}" target="_blank" rel="noopener">💬 WhatsApp</a>` : chip(r.medio);
+            })()}</td>
             <td class="der"><div class="acc solo-recepcion">
               <button class="mini" data-rec="${r.id_recordatorio}" data-estado="realizado">Marcar realizado</button>
               <button class="mini rojo" data-rec="${r.id_recordatorio}" data-estado="cancelado">Cancelar</button>
